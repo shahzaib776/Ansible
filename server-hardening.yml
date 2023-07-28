@@ -1,0 +1,41 @@
+- hosts: localhost
+  name: Playing with ansible
+  connection: local
+  become: true
+  become_user: root
+  tasks:
+    - name: Update packages
+      ansible.builtin.apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+
+    - name: Install openssh-server
+      ansible.builtin.apt:
+        name: openssh-server
+
+    - name: Create user called test
+      ansible.builtin.user:
+        name: test
+        uid: 1012
+        group: sudo
+        createhome: yes
+        home: /home/test
+
+    - name: Add SSH Keys
+      ansible.posix.authorized_key:
+        user: test
+        state: present
+        key: "{{ lookup('file', '/home/test/.ssh/id_rsa.pub') }}"
+
+    - name: Check fail2ban is installed
+      ansible.builtin.shell: command -v fail2ban
+      register: fail2ban_exists
+      ignore_errors: yes
+
+    - name: Install fail2ban
+      become_user: test
+      when: fail2ban_exists is failed
+      apsible.builtin.apt:
+        name: fail2ban
+        
