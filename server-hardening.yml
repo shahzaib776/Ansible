@@ -35,4 +35,5 @@
       apt:
         name: fail2ban
         state: present
-      when: fail2ban not in ansible_facts.packages
+      when: 
+        - "'fail2ban' not in ansible_facts.packages"
