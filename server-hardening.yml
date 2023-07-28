@@ -27,14 +27,12 @@
         state: present
         key: "{{ lookup('file', 'test-key.pub') }}"
 
-    - name: Check fail2ban is installed
-      shell: command -v fail2ban
-      register: fail2ban_exists
-      ignore_errors: yes
+    - name: Gather package facts
+      package_facts:
+        manager: apt
 
-    - name: Install fail2ban
-      become_user: test
-      when: fail2ban_exists is failed
+    - name: Install fail2ban if absent
       apt:
         name: fail2ban
-        
+        state: present
+      when: fail2ban not in ansible_facts.packages
